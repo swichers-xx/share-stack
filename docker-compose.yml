@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud/all-in-one:latest
+    restart: always
+    container_name: nextcloud-aio-mastercontainer 
+    volumes:
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config 
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    ports:
+      - 1180:80
+      - 18080:8080
+      - 18443:8443
+    networks:
+      - nextcloud-aio
+
+  caddy:
+    image: caddy:alpine
+    restart: always
+    container_name: caddy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - ./config:/config:ro
+      - ./data:/data:ro
+      - ./sites:/srv:ro
+    network_mode: "host"
+    networks:
+      - nextcloud-aio
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer 
+
+networks:
+  nextcloud-aio:
+    name: nextcloud-aio 
+    driver: bridge
